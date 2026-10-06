@@ -21,6 +21,11 @@
         <input id="scrubber" type="range" min="0" step="1" value="0" aria-label="Date">
       </div>
       <div id="race" class="race" role="img" aria-label="Race chart of cumulative rides by city"></div>
+      <table id="final" hidden>
+        <caption>Final cumulative rides by city</caption>
+        <thead><tr><th>City</th><th>Rides</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </section>
   </main>
   <script type="module">
@@ -28,6 +33,7 @@
     import { raceFrames } from "./src/race.js";
 
     const FRAME_MS = 100;
+    const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const response = await fetch("./data/rides.csv");
     const { frames, max } = raceFrames(parseCsv(await response.text()));
@@ -35,6 +41,7 @@
     const dateEl = document.getElementById("date");
     const leaderEl = document.getElementById("leader");
     const race = document.getElementById("race");
+    const finalTable = document.getElementById("final");
     const controls = document.getElementById("controls");
     const toggle = document.getElementById("toggle");
     const scrubber = document.getElementById("scrubber");
@@ -122,8 +129,18 @@
         render();
       });
 
+      for (const { city, rides } of frames.at(-1).cities) {
+        const tr = finalTable.tBodies[0].insertRow();
+        tr.insertCell().textContent = city;
+        tr.insertCell().textContent = rides.toLocaleString();
+      }
+      finalTable.hidden = false;
+
+      race.style.setProperty("--frame-ms", `${FRAME_MS}ms`);
       scrubber.max = frames.length - 1;
       controls.hidden = false;
+      // With reduced motion, open on the final frame and wait to be asked to play.
+      if (reducedMotion) index = frames.length - 1;
       if (!atEnd()) play();
       render();
     }

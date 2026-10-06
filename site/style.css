@@ -5,14 +5,16 @@ nav a { color: #028090; margin-right: 1rem; }
 table { border-collapse: collapse; margin: 1rem 0; }
 th, td { border: 1px solid #d0d0d0; padding: 0.3rem 0.8rem; text-align: left; }
 th { background: #f2f2f2; }
+caption { text-align: left; white-space: nowrap; padding-bottom: 0.3rem; }
 .bars { display: flex; flex-direction: column; gap: 0.4rem; margin: 1rem 0; }
 .bar { background: #028090; color: #ffffff; padding: 0.3rem 0.6rem; border-radius: 3px; white-space: nowrap; min-width: 6rem; }
 .race { display: flex; flex-direction: column; gap: 0.4rem; margin: 1rem 0; }
 .race-row { display: grid; grid-template-columns: 5rem 1fr 4.5rem; align-items: center; gap: 0.6rem; }
 .race-track { display: block; }
-.race-bar { display: block; height: 1.8rem; background: #028090; border-radius: 3px; transition: width 100ms linear; }
+.race-bar { display: block; height: 1.8rem; background: #028090; border-radius: 3px; transition: width var(--frame-ms, 100ms) linear; }
 .race-rides { text-align: right; font-variant-numeric: tabular-nums; }
 .race-controls { display: flex; align-items: center; gap: 0.6rem; margin: 1rem 0; }
 .race[hidden], .race-controls[hidden] { display: none; }
 .race-controls button { min-width: 5rem; padding: 0.3rem 0.6rem; font: inherit; }
 .race-controls input { flex: 1; min-width: 0; }
+@media (prefers-reduced-motion: reduce) { .race-bar { transition: none; } }
