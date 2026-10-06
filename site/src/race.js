@@ -1,8 +1,9 @@
 // Frames for the race chart, built from ride rows: [{ date, city, rides }, ...].
 
-// One frame per date, ascending: { date, cities: [{ city, rides }, ...] } with rides
-// cumulative up to and including that date and cities in rank order. Every frame
-// has every city; a city with no ride row on a date keeps its cumulative rides.
+// One frame per date, ascending: { date, cities: [{ city, rides }, ...], leader, lead }
+// with rides cumulative up to and including that date and cities in rank order.
+// Every frame has every city; a city with no ride row on a date keeps its
+// cumulative rides.
 // leader is the top-ranked city and lead how far it is ahead of the second-ranked
 // city; a tied frame has neither, and a single city leads with no lead.
 // max is the highest cumulative rides in the last frame, for scaling bars.
