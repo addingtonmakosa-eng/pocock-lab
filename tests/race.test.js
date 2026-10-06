@@ -9,9 +9,9 @@ test("raceFrames gives each city's cumulative rides up to and including the fram
     { date: "2026-07-03", city: "Miami", rides: 7 },
   ]);
   assert.deepEqual(frames, [
-    { date: "2026-07-01", cities: [{ city: "Miami", rides: 10 }] },
-    { date: "2026-07-02", cities: [{ city: "Miami", rides: 15 }] },
-    { date: "2026-07-03", cities: [{ city: "Miami", rides: 22 }] },
+    { date: "2026-07-01", cities: [{ city: "Miami", rides: 10 }], leader: "Miami", lead: null },
+    { date: "2026-07-02", cities: [{ city: "Miami", rides: 15 }], leader: "Miami", lead: null },
+    { date: "2026-07-03", cities: [{ city: "Miami", rides: 22 }], leader: "Miami", lead: null },
   ]);
 });
 
@@ -29,6 +29,8 @@ test("raceFrames has one frame per date, in ascending order, whatever order the 
         { city: "Boston", rides: 20 },
         { city: "Miami", rides: 10 },
       ],
+      leader: "Boston",
+      lead: 10,
     },
     {
       date: "2026-07-02",
@@ -36,6 +38,8 @@ test("raceFrames has one frame per date, in ascending order, whatever order the 
         { city: "Boston", rides: 50 },
         { city: "Miami", rides: 15 },
       ],
+      leader: "Boston",
+      lead: 35,
     },
   ]);
 });
@@ -80,6 +84,8 @@ test("raceFrames shows a city at 0 in frames before its first ride row", () => {
         { city: "Boston", rides: 20 },
         { city: "Miami", rides: 0 },
       ],
+      leader: "Boston",
+      lead: 20,
     },
     {
       date: "2026-07-02",
@@ -87,6 +93,8 @@ test("raceFrames shows a city at 0 in frames before its first ride row", () => {
         { city: "Boston", rides: 25 },
         { city: "Miami", rides: 10 },
       ],
+      leader: "Boston",
+      lead: 15,
     },
   ]);
 });
@@ -110,7 +118,9 @@ test("raceFrames sums multiple ride rows for the same city and date", () => {
     { date: "2026-07-01", city: "Miami", rides: 10 },
     { date: "2026-07-01", city: "Miami", rides: 6 },
   ]);
-  assert.deepEqual(frames, [{ date: "2026-07-01", cities: [{ city: "Miami", rides: 16 }] }]);
+  assert.deepEqual(frames, [
+    { date: "2026-07-01", cities: [{ city: "Miami", rides: 16 }], leader: "Miami", lead: null },
+  ]);
 });
 
 test("raceFrames has no frame for a calendar day with no ride rows", () => {
@@ -138,4 +148,34 @@ test("raceFrames changes rank order when one city overtakes another", () => {
       ["Miami", "Boston"],
     ],
   );
+});
+
+const leaderAndLead = ({ leader, lead }) => ({ leader, lead });
+
+test("raceFrames gives each frame's leader and its lead over the second-ranked city", () => {
+  const { frames } = raceFrames([
+    { date: "2026-07-01", city: "Boston", rides: 20 },
+    { date: "2026-07-01", city: "Denver", rides: 5 },
+    { date: "2026-07-01", city: "Miami", rides: 12 },
+    { date: "2026-07-02", city: "Boston", rides: 1 },
+    { date: "2026-07-02", city: "Miami", rides: 30 },
+  ]);
+  assert.deepEqual(frames.map(leaderAndLead), [
+    { leader: "Boston", lead: 8 },
+    { leader: "Miami", lead: 21 },
+  ]);
+});
+
+test("raceFrames gives a tied frame no leader and no lead", () => {
+  const { frames } = raceFrames([
+    { date: "2026-07-01", city: "Boston", rides: 20 },
+    { date: "2026-07-01", city: "Denver", rides: 5 },
+    { date: "2026-07-01", city: "Miami", rides: 20 },
+  ]);
+  assert.deepEqual(frames.map(leaderAndLead), [{ leader: null, lead: null }]);
+});
+
+test("raceFrames gives a single city as the leader with no lead", () => {
+  const { frames } = raceFrames([{ date: "2026-07-01", city: "Miami", rides: 10 }]);
+  assert.deepEqual(frames.map(leaderAndLead), [{ leader: "Miami", lead: null }]);
 });
