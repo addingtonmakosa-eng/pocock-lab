@@ -116,6 +116,12 @@
         render();
       });
 
+      // Grabbing the thumb changes no value yet, so pause before the first move.
+      scrubber.addEventListener("pointerdown", () => {
+        pause();
+        render();
+      });
+
       scrubber.max = frames.length - 1;
       controls.hidden = false;
       if (!atEnd()) play();
