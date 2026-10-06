@@ -12,3 +12,7 @@ th { background: #f2f2f2; }
 .race-track { display: block; }
 .race-bar { display: block; height: 1.8rem; background: #028090; border-radius: 3px; transition: width 100ms linear; }
 .race-rides { text-align: right; font-variant-numeric: tabular-nums; }
+.race-controls { display: flex; align-items: center; gap: 0.6rem; margin: 1rem 0; }
+.race-controls[hidden] { display: none; }
+.race-controls button { min-width: 5rem; padding: 0.3rem 0.6rem; font: inherit; }
+.race-controls input { flex: 1; min-width: 0; }
