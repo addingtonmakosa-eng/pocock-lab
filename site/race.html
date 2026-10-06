@@ -33,17 +33,17 @@
       new Date(date).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 
     // One row per city, kept for the whole run so bar widths can transition.
-    const rows = new Map();
+    const rowByCity = new Map();
     function rowFor(city) {
-      if (!rows.has(city)) {
+      if (!rowByCity.has(city)) {
         const row = document.createElement("div");
         row.className = "race-row";
         row.innerHTML = `<span class="race-city"></span><span class="race-track"><span class="race-bar"></span></span><span class="race-rides"></span>`;
         row.querySelector(".race-city").textContent = city;
         race.appendChild(row);
-        rows.set(city, row);
+        rowByCity.set(city, row);
       }
-      return rows.get(city);
+      return rowByCity.get(city);
     }
 
     function show(frame) {
@@ -51,20 +51,24 @@
       frame.cities.forEach(({ city, rides }, rank) => {
         const row = rowFor(city);
         row.style.order = rank;
-        row.querySelector(".race-bar").style.width = `${(rides / max) * 100}%`;
+        row.querySelector(".race-bar").style.width = `${max ? (rides / max) * 100 : 0}%`;
         row.querySelector(".race-rides").textContent = rides.toLocaleString();
       });
     }
 
     if (frames.length === 0) {
       dateEl.textContent = "No ride data.";
+      race.hidden = true;
     } else {
       let index = 0;
       show(frames[index]);
       const timer = setInterval(() => {
+        if (index === frames.length - 1) {
+          clearInterval(timer);
+          return;
+        }
         index += 1;
         show(frames[index]);
-        if (index === frames.length - 1) clearInterval(timer);
       }, FRAME_MS);
     }
   </script>
