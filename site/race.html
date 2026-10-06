@@ -15,6 +15,7 @@
     <section>
       <h2>Cumulative rides by city</h2>
       <p id="date">Loading data&hellip;</p>
+      <p id="leader"></p>
       <div id="race" class="race" role="img" aria-label="Race chart of cumulative rides by city"></div>
     </section>
   </main>
@@ -28,6 +29,7 @@
     const { frames, max } = raceFrames(parseCsv(await response.text()));
 
     const dateEl = document.getElementById("date");
+    const leaderEl = document.getElementById("leader");
     const race = document.getElementById("race");
     const formatDate = (date) =>
       new Date(date).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
@@ -46,8 +48,15 @@
       return rowByCity.get(city);
     }
 
+    function leaderLabel({ cities, leader, lead }) {
+      if (leader === null) return "The top cities are tied";
+      if (lead === null) return `${leader} leads`;
+      return `${leader} leads ${cities[1].city} by ${lead.toLocaleString()} ${lead === 1 ? "ride" : "rides"}`;
+    }
+
     function show(frame) {
       dateEl.textContent = formatDate(frame.date);
+      leaderEl.textContent = leaderLabel(frame);
       frame.cities.forEach(({ city, rides }, rank) => {
         const row = rowFor(city);
         row.style.order = rank;
