@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Race chart - Rides dashboard</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header>
+    <h1>Rides dashboard</h1>
+    <nav><a href="./index.html">Home</a><a href="./race.html">Race chart</a></nav>
+  </header>
+  <main>
+    <section>
+      <h2>Cumulative rides by city</h2>
+      <p id="date">Loading data&hellip;</p>
+      <div id="race" class="race" role="img" aria-label="Race chart of cumulative rides by city"></div>
+    </section>
+  </main>
+  <script type="module">
+    import { parseCsv } from "./src/csv.js";
+    import { raceFrames } from "./src/race.js";
+
+    const FRAME_MS = 100;
+
+    const response = await fetch("./data/rides.csv");
+    const { frames, max } = raceFrames(parseCsv(await response.text()));
+
+    const dateEl = document.getElementById("date");
+    const race = document.getElementById("race");
+    const formatDate = (date) =>
+      new Date(date).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+
+    // One row per city, kept for the whole run so bar widths can transition.
+    const rows = new Map();
+    function rowFor(city) {
+      if (!rows.has(city)) {
+        const row = document.createElement("div");
+        row.className = "race-row";
+        row.innerHTML = `<span class="race-city"></span><span class="race-track"><span class="race-bar"></span></span><span class="race-rides"></span>`;
+        row.querySelector(".race-city").textContent = city;
+        race.appendChild(row);
+        rows.set(city, row);
+      }
+      return rows.get(city);
+    }
+
+    function show(frame) {
+      dateEl.textContent = formatDate(frame.date);
+      frame.cities.forEach(({ city, rides }, rank) => {
+        const row = rowFor(city);
+        row.style.order = rank;
+        row.querySelector(".race-bar").style.width = `${(rides / max) * 100}%`;
+        row.querySelector(".race-rides").textContent = rides.toLocaleString();
+      });
+    }
+
+    if (frames.length === 0) {
+      dateEl.textContent = "No ride data.";
+    } else {
+      let index = 0;
+      show(frames[index]);
+      const timer = setInterval(() => {
+        index += 1;
+        show(frames[index]);
+        if (index === frames.length - 1) clearInterval(timer);
+      }, FRAME_MS);
+    }
+  </script>
+</body>
+</html>

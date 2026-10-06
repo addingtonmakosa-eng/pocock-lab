@@ -7,3 +7,8 @@ th, td { border: 1px solid #d0d0d0; padding: 0.3rem 0.8rem; text-align: left; }
 th { background: #f2f2f2; }
 .bars { display: flex; flex-direction: column; gap: 0.4rem; margin: 1rem 0; }
 .bar { background: #028090; color: #ffffff; padding: 0.3rem 0.6rem; border-radius: 3px; white-space: nowrap; min-width: 6rem; }
+.race { display: flex; flex-direction: column; gap: 0.4rem; margin: 1rem 0; }
+.race-row { display: grid; grid-template-columns: 5rem 1fr 4.5rem; align-items: center; gap: 0.6rem; }
+.race-track { display: block; }
+.race-bar { display: block; height: 1.8rem; background: #028090; border-radius: 3px; transition: width 100ms linear; }
+.race-rides { text-align: right; font-variant-numeric: tabular-nums; }
