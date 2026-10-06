@@ -16,6 +16,10 @@
       <h2>Cumulative rides by city</h2>
       <p id="date">Loading data&hellip;</p>
       <p id="leader"></p>
+      <div id="controls" class="race-controls" hidden>
+        <button id="toggle" type="button">Pause</button>
+        <input id="scrubber" type="range" min="0" step="1" value="0" aria-label="Date">
+      </div>
       <div id="race" class="race" role="img" aria-label="Race chart of cumulative rides by city"></div>
     </section>
   </main>
@@ -31,6 +35,9 @@
     const dateEl = document.getElementById("date");
     const leaderEl = document.getElementById("leader");
     const race = document.getElementById("race");
+    const controls = document.getElementById("controls");
+    const toggle = document.getElementById("toggle");
+    const scrubber = document.getElementById("scrubber");
     const formatDate = (date) =>
       new Date(date).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 
@@ -70,15 +77,55 @@
       race.hidden = true;
     } else {
       let index = 0;
-      show(frames[index]);
-      const timer = setInterval(() => {
-        if (index === frames.length - 1) {
-          clearInterval(timer);
-          return;
-        }
-        index += 1;
+      let timer = null; // set while playing
+      const atEnd = () => index === frames.length - 1;
+
+      function render() {
         show(frames[index]);
-      }, FRAME_MS);
+        scrubber.value = index;
+        scrubber.setAttribute("aria-valuetext", formatDate(frames[index].date));
+        toggle.textContent = timer ? "Pause" : atEnd() ? "Replay" : "Play";
+      }
+
+      function pause() {
+        clearInterval(timer);
+        timer = null;
+      }
+
+      function play() {
+        timer = setInterval(() => {
+          if (!atEnd()) index += 1;
+          if (atEnd()) pause();
+          render();
+        }, FRAME_MS);
+      }
+
+      toggle.addEventListener("click", () => {
+        if (timer) {
+          pause();
+        } else {
+          if (atEnd()) index = 0;
+          play();
+        }
+        render();
+      });
+
+      scrubber.addEventListener("input", () => {
+        pause();
+        index = Number(scrubber.value);
+        render();
+      });
+
+      // Grabbing the thumb changes no value yet, so pause before the first move.
+      scrubber.addEventListener("pointerdown", () => {
+        pause();
+        render();
+      });
+
+      scrubber.max = frames.length - 1;
+      controls.hidden = false;
+      if (!atEnd()) play();
+      render();
     }
   </script>
 </body>
